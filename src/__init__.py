@@ -4,6 +4,7 @@ from src.db.database import init_db
 from .auth.route import user_router
 from .product.route import product_router
 from .cart.route import cartrouter
+from .order.route import orderrouter
 from src.auth.model import User
 from src.product.model import Product
 from src.cart.model import Cart
@@ -31,6 +32,7 @@ app = FastAPI(
 app.include_router(user_router, prefix=f"/api/{version}/user", tags=["user"])
 app.include_router(product_router, prefix=f"/api/{version}/products", tags=["products"])
 app.include_router(cartrouter, prefix=f"/api/{version}/cart", tags=["carts"])
+app.include_router(orderrouter, prefix=f"/api/{version}/orders", tags=["orders"])
 
 app.add_middleware(
     CORSMiddleware,
