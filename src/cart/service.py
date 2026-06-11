@@ -3,7 +3,11 @@ from sqlmodel import select
 
 from src.product.model import Product
 from .model import Cart
-from .schemas import AddToCartSchema, CartItemResponse, CartItemUpdateSchema
+from .schemas import (
+    AddToCartSchema,
+    CartItemResponse,
+    CartItemUpdateSchema,
+)
 from src.auth.model import User
 from src.product.service import ProductService
 
@@ -22,6 +26,15 @@ QTY_ALLOWED_PER_CUSTOMER_PER_PRODUCT = 5
 
 
 class Cart_service:
+    async def ordersummaryConfig(self):
+
+        return {
+            "tax_percentage": 8,
+            "delivery_charge_threshold": 700,
+            "base_delivery_charge": 50,
+            "express_shipping_charge": 99,
+            "same_day_shipping_charge": 249,
+        }
 
     async def validated_fields(
         self, quantity: int, selectedSize: str, selectedColor: str, product
@@ -33,7 +46,9 @@ class Cart_service:
             raise InsufficientStockException(stock=product.stock)
 
         if quantity > QTY_ALLOWED_PER_CUSTOMER_PER_PRODUCT:
-            raise QuantityLimitExceededException(max_qty=QTY_ALLOWED_PER_CUSTOMER_PER_PRODUCT)
+            raise QuantityLimitExceededException(
+                max_qty=QTY_ALLOWED_PER_CUSTOMER_PER_PRODUCT
+            )
 
         if selectedColor not in product.colors:
             raise InvalidColorException()
@@ -189,4 +204,18 @@ class Cart_service:
         for item in cart_items:
             await session.delete(item)
         await session.commit()
-        return {"detail": "Cart cleared successfully"}  
+        return {"detail": "Cart cleared successfully"}
+
+    async def clear_cart_items_withoutCommit(
+        self,
+        session,
+        currentUser,
+    ):
+        stmt = select(Cart).where(Cart.user_id == currentUser.uid)
+
+        result = await session.exec(stmt)
+
+        cart_items = result.all()
+
+        for item in cart_items:
+            await session.delete(item)

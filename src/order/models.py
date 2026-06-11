@@ -63,7 +63,7 @@ class Order(SQLModel, table=True):
     payment_method: PaymentMethod = Field(default=PaymentMethod.COD)
 
     status: OrderStatus = Field(default=OrderStatus.PENDING)
-    base_delivery_charge: int
+    delivery_charge: int
 
     delivery_name: str
     delivery_phone: str

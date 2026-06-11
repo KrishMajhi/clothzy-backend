@@ -17,14 +17,6 @@ class CartItemUpdateSchema(BaseModel):
     quantity: int = Field(gt=0, default=1)
 
 
-# class AddToCartResponseSchema(BaseModel):
-
-#   "user_id": "3acc561d-7b6f-4c69-a907-ed943ff41686",
-#   "uid": "afa2940c-dcb6-4d82-8f67-47c44fc460c7",
-#   product_id: uuid.UUID
-#   quantity: int
-
-
 class CartItemResponse(BaseModel):
     cart_id: uuid.UUID
     product_id: uuid.UUID
@@ -51,4 +43,16 @@ class CartItemResponse(BaseModel):
 
     selected_size: str
     selected_color: str
-    subtotal:float
+    subtotal: float
+
+
+class OrderSummaryConfigResponse(BaseModel):
+    tax_percentage: float
+
+    delivery_charge_threshold: float
+
+    base_delivery_charge: float
+
+    express_shipping_charge: float
+
+    same_day_shipping_charge: float

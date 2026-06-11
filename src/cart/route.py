@@ -2,13 +2,27 @@ from fastapi import APIRouter, Depends
 
 from src.db.database import get_session
 from .service import Cart_service
-from .schemas import AddToCartSchema, CartItemUpdateSchema, CartItemResponse
+from .schemas import (
+    AddToCartSchema,
+    CartItemUpdateSchema,
+    CartItemResponse,
+    OrderSummaryConfigResponse,
+)
 from src.auth.dependencies import get_current_user
 from src.errors import CartItemNotFoundException
 
 cartrouter = APIRouter()
 
 cartService = Cart_service()
+
+
+@cartrouter.get(
+    "/summary",
+    response_model=OrderSummaryConfigResponse,
+)
+async def get_order_summary_config():
+    data = await cartService.ordersummaryConfig()
+    return OrderSummaryConfigResponse(data)
 
 
 @cartrouter.post("/add")
@@ -52,7 +66,9 @@ async def update_item_incart(
     currentUser=Depends(get_current_user),
     session=Depends(get_session),
 ):
-    item = await cartService.update_cart_item(cart_itemid, updatedData, session, currentUser)
+    item = await cartService.update_cart_item(
+        cart_itemid, updatedData, session, currentUser
+    )
     return item
 
 
