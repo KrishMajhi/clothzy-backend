@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from src.db.database import init_db
@@ -46,5 +48,5 @@ register_error_handlers(app)
 
 
 @app.get("/")
-def home():
+def home() -> Literal['hello world']:
     return "hello world"
