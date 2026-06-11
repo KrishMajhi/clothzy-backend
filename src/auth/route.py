@@ -26,8 +26,7 @@ from src.errors import (
 
 user_router = APIRouter()
 userService = UserService()
-REFRESH_TOKEN_EXPIRY_IN_DAYS = 7
-
+from src.config import config 
 
 @user_router.post("/signup", response_model=user_model)
 async def user_register(userdata: user_create_model, session=Depends(get_session)):

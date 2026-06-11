@@ -158,3 +158,28 @@ class OrderService:
         except Exception:
             await session.rollback()
             raise
+
+
+
+# Host
+# ep-sparkling-pond-aout11g1.c-2.ap-southeast-1.aws.neon.tech
+# Database
+# neondb
+# Role
+# neondb_owner
+# Password
+# ************
+# Pooler host
+# ep-sparkling-pond-aout11g1-pooler.c-2.ap-southeast-1.aws.neon.tech
+
+
+
+
+
+
+
+
+
+
+
+# postgresql://neondb_owner:npg_7nRdKqsMp9NW@ep-sparkling-pond-aout11g1.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
