@@ -61,9 +61,12 @@ def decode_token(token: str):
 
 
 def get_device_info(request: Request):
-    ip = request.headers.get(
-        "x-forwarded-for",
-        request.client.host if request.client else "unknown",
+    forwarded = request.headers.get("x-forwarded-for")
+
+    ip = (
+        forwarded.split(",")[0].strip()
+        if forwarded
+        else request.client.host
     )
 
     user_agent = request.headers.get("user-agent", "unknown")
