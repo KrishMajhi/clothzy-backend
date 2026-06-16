@@ -38,7 +38,7 @@ app.include_router(orderrouter, prefix=f"/api/{version}/orders", tags=["orders"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://clothzy-frontend-v2.vercel.app"],
+    allow_origins=["http://localhost:5173", "https://clothzy-frontend-v2.vercel.app","https://clothzy-ecommerce.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
