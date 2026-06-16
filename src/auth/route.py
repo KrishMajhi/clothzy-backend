@@ -67,15 +67,21 @@ async def user_login(
             refresh=True,
             expiry=timedelta(days=7),
         )
-        device = get_device_info(request)
+        # device = get_device_info(request)
 
-        device_name = parse_device(device["user_agent"])
+        # device_name = parse_device(device["user_agent"])
 
-        logger.info(
-            f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}"
-        )
-        print("LOGIN ENDPOINT REACHED")
-        print(f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}")
+        # # logger.info(
+        # #     f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}"
+        # # )
+        # # print("LOGIN ENDPOINT REACHED")
+        # # print(f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}")
+
+        print("========== LOGIN DEBUG ==========")
+        print(request.headers.get("user-agent"))
+        print(request.headers.get("x-forwarded-for"))
+        print(request.client.host if request.client else "NO CLIENT")
+        print("================================")
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
