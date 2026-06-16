@@ -58,6 +58,8 @@ def decode_token(token: str):
 
 
 
+
+
 def get_device_info(request: Request):
     ip = request.headers.get(
         "x-forwarded-for",
@@ -70,3 +72,16 @@ def get_device_info(request: Request):
         "ip": ip,
         "user_agent": user_agent,
     }
+
+
+def parse_device(user_agent: str):
+    if "Chrome" in user_agent:
+        return "Chrome Browser"
+
+    if "Firefox" in user_agent:
+        return "Firefox Browser"
+
+    if "Safari" in user_agent:
+        return "Safari Browser"
+
+    return "Unknown Device" 

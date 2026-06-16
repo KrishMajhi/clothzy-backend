@@ -26,7 +26,7 @@ from src.errors import (
 from fastapi import Request
 
 from .logger import logger
-from .utility import get_device_info
+from .utility import get_device_info, parse_device
 
 user_router = APIRouter()
 userService = UserService()
@@ -69,12 +69,13 @@ async def user_login(
         )
         device = get_device_info(request)
 
-        logger.info(f"""
-            LOGIN SUCCESS
-            User: {user.email}
-            IP: {device["ip"]}
-            Device: {device["user_agent"]}
-            """)
+        device_name = parse_device(device["user_agent"])
+
+        logger.info(
+            f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}"
+        )
+        print("LOGIN ENDPOINT REACHED")
+        print(f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}")
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
