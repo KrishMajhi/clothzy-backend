@@ -47,6 +47,7 @@ async def user_register(userdata: user_create_model, session=Depends(get_session
 async def user_login(
     user_creds: user_login_model, request: Request, session=Depends(get_session)
 ):
+    print("LOGIN ENDPOINT REACHED")
     user = await userService.get_user_by_email(session, user_creds.email)
 
     if user and verify_password(user.hashed_password, user_creds.password):
@@ -74,7 +75,6 @@ async def user_login(
         logger.info(
             f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}"
         )
-        print("LOGIN ENDPOINT REACHED")
         print(f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}")
         return {
             "access_token": access_token,
