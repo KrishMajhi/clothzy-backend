@@ -93,7 +93,7 @@ class OrderService:
             product = await session.scalar(
                 select(Product).where(Product.id == item.product_id).with_for_update()
             )
-
+            # locking product row
             if not product:
                 raise HTTPException(
                     status_code=404, detail=f"Product not found: {item.name}"
@@ -108,64 +108,70 @@ class OrderService:
                 raise HTTPException(
                     status_code=400, detail=f"{product.name} is out of stock"
                 )
-        subtotal = sum(item.subtotal for item in cartdata)
-        summary = await self.calculate_total_amount(
-            subtotal=subtotal,
-            shipping_method=neworderdata.shipping_method,
-        )
+        if neworderdata.payment_method == "cod":
+            # just keepinf it for check /here will come payment
+            subtotal = sum(item.subtotal for item in cartdata)
+            summary = await self.calculate_total_amount(
+                subtotal=subtotal,
+                shipping_method=neworderdata.shipping_method,
+            )
 
-        new_order = Order(
-            user_id=current_user.uid,
-            subtotal=subtotal,
-            tax=summary["tax"],
-            delivery_charge=summary["delivery_charge"],
-            shipping_charge=summary["shipping_charge"],
-            discount=summary["discount"],
-            total_amount=summary["total_amount"],
-            shipping_method=neworderdata.shipping_method,
-            payment_method=neworderdata.payment_method,
-            promo_code=neworderdata.promo_code,
-            delivery_name=neworderdata.delivery_name,
-            delivery_phone=neworderdata.delivery_phone,
-            address_line_1=neworderdata.address_line_1,
-            address_line_2=neworderdata.address_line_2,
-            city=neworderdata.city,
-            state=neworderdata.state,
-            country=neworderdata.country,
-            postal_code=neworderdata.postal_code,
-        )
+            new_order = Order(
+                user_id=current_user.uid,
+                subtotal=subtotal,
+                tax=summary["tax"],
+                delivery_charge=summary["delivery_charge"],
+                shipping_charge=summary["shipping_charge"],
+                discount=summary["discount"],
+                total_amount=summary["total_amount"],
+                shipping_method=neworderdata.shipping_method,
+                payment_method=neworderdata.payment_method,
+                promo_code=neworderdata.promo_code,
+                delivery_name=neworderdata.delivery_name,
+                delivery_phone=neworderdata.delivery_phone,
+                address_line_1=neworderdata.address_line_1,
+                address_line_2=neworderdata.address_line_2,
+                city=neworderdata.city,
+                state=neworderdata.state,
+                country=neworderdata.country,
+                postal_code=neworderdata.postal_code,
+            )
 
-        session.add(new_order)
+            session.add(new_order)
 
-        await session.flush()
-        try:
+            await session.flush()
+            try:
 
-            for item in cartdata:
-                neworderitem = OrderItem(
-                    order_id=new_order.id,
-                    product_id=item.product_id,
-                    product_name=item.name,
-                    quantity=item.quantity,
-                    price_at_purchase=item.price,
-                    selected_color=item.selected_color,
-                    selected_size=item.selected_size,
-                    subtotal=item.subtotal,
-                )
-                session.add(neworderitem)
+                for item in cartdata:
+                    neworderitem = OrderItem(
+                        order_id=new_order.id,
+                        product_id=item.product_id,
+                        product_name=item.name,
+                        quantity=item.quantity,
+                        price_at_purchase=item.price,
+                        selected_color=item.selected_color,
+                        selected_size=item.selected_size,
+                        subtotal=item.subtotal,
+                    )
+                    session.add(neworderitem)
 
-                product = locked_products[item.product_id]
+                    product = locked_products[item.product_id]
 
-                product.stock -= item.quantity
+                    product.stock -= item.quantity
 
-                session.add(product)
-            await cart_service.clear_cart_items_withoutCommit(session, current_user)
-            await session.commit()
-            await session.refresh(new_order)
-            return new_order
+                    session.add(product)
+                await cart_service.clear_cart_items_withoutCommit(session, current_user)
+                await session.commit()
+                await session.refresh(new_order)
+                return new_order
 
-        except Exception:
-            await session.rollback()
-            raise
+            except Exception:
+                await session.rollback()
+                raise
+        else:
+            raise HTTPException(
+                status_code="500", detail="othr payment mehtod will come later"
+            )
 
     async def get_all_orders(
         self,

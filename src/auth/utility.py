@@ -1,4 +1,4 @@
-from ast import Return
+from fastapi import Request
 from datetime import date, timedelta, datetime
 import logging
 
@@ -54,3 +54,19 @@ def decode_token(token: str):
     except jwt.PyJWTError as err:
         logging.exception(err)
         return None
+
+
+
+
+def get_device_info(request: Request):
+    ip = request.headers.get(
+        "x-forwarded-for",
+        request.client.host if request.client else "unknown",
+    )
+
+    user_agent = request.headers.get("user-agent", "unknown")
+
+    return {
+        "ip": ip,
+        "user_agent": user_agent,
+    }

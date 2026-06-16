@@ -23,10 +23,15 @@ from src.errors import (
     OldPasswordIncorrectException,
     SamePasswordException,
 )
+from fastapi import Request
+
+from .logger import logger
+from .utility import get_device_info
 
 user_router = APIRouter()
 userService = UserService()
-from src.config import config 
+from src.config import config
+
 
 @user_router.post("/signup", response_model=user_model)
 async def user_register(userdata: user_create_model, session=Depends(get_session)):
@@ -39,7 +44,9 @@ async def user_register(userdata: user_create_model, session=Depends(get_session
 
 
 @user_router.post("/login")
-async def user_login(user_creds: user_login_model, session=Depends(get_session)):
+async def user_login(
+    user_creds: user_login_model, request: Request, session=Depends(get_session)
+):
     user = await userService.get_user_by_email(session, user_creds.email)
 
     if user and verify_password(user.hashed_password, user_creds.password):
@@ -60,7 +67,14 @@ async def user_login(user_creds: user_login_model, session=Depends(get_session))
             refresh=True,
             expiry=timedelta(days=7),
         )
+        device = get_device_info(request)
 
+        logger.info(f"""
+            LOGIN SUCCESS
+            User: {user.email}
+            IP: {device["ip"]}
+            Device: {device["user_agent"]}
+            """)
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
