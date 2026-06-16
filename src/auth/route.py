@@ -75,7 +75,14 @@ async def user_login(
         logger.info(
             f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}"
         )
+        print(
+            "########################################################################>>>>>>>>>>>>>>>>>>.."
+        )
+        print("LOGIN ENDPOINT REACHED")
         print(f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}")
+        print(
+            "########################################################################>>>>>>>>>>>>>>>>>>.."
+        )
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
