@@ -78,9 +78,19 @@ async def user_login(
         # # print(f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}")
 
         print("========== LOGIN DEBUG ==========")
-        print(request.headers.get("user-agent"))
-        print(request.headers.get("x-forwarded-for"))
-        print(request.client.host if request.client else "NO CLIENT")
+        # print(request.headers.get("user-agent"))
+        # print(request.headers.get("x-forwarded-for"))
+        # print(request.client.host if request.client else "NO CLIENT")
+
+        print(
+        f"""
+        LOGIN SUCCESS
+        User: {user.email}
+        IP: {ip}
+        Device: {device_name}
+        Browser: {browser_name}
+        """
+        )
         print("================================")
         return {
             "access_token": access_token,
