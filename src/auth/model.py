@@ -23,11 +23,13 @@ class User(
 
     username: str
     email: str
+    email_verified: bool=Field(default=False)
+
     hashed_password: str = Field(nullable=False, exclude=True)
     # personal
     fullname: str | None = None
     phone_number: str | None = None
-
+    phone_verified: bool = False
     # address
     address_line_1: str | None = None
     address_line_2: str | None = None

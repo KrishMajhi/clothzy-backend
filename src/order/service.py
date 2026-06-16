@@ -3,7 +3,6 @@ from ast import stmt
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, func, desc, or_
 
-from Backend.src import order
 from .schema import (
     CreateOrderRequest,
     OrderDetailResponse,
