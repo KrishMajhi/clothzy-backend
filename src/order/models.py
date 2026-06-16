@@ -74,7 +74,7 @@ class Order(SQLModel, table=True):
     city: str
     state: str
     country: str
-    postal_code: str
+    postal_code: str 
 
     created_at: datetime = Field(
         sa_column=Column(pg.TIMESTAMP(timezone=True), default=func.now())

@@ -1,6 +1,15 @@
+from ast import stmt
+
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, func, desc, or_
-from .schema import CreateOrderRequest
+
+from Backend.src import order
+from .schema import (
+    CreateOrderRequest,
+    OrderDetailResponse,
+    OrderItemResponse,
+    OrderResponse,
+)
 from src.auth.model import User
 from src.cart.model import Cart
 from src.cart.service import Cart_service, CartItemResponse
@@ -159,27 +168,76 @@ class OrderService:
             await session.rollback()
             raise
 
+    async def get_all_orders(
+        self,
+        currentuser: User,
+        session: AsyncSession,
+    ):
+        stmt = (
+            select(Order, OrderItem)
+            .join(OrderItem, OrderItem.order_id == Order.id)
+            .where(Order.user_id == currentuser.uid)
+        )
 
+        result = await session.exec(stmt)
+        rows = result.all()
 
-# Host
-# ep-sparkling-pond-aout11g1.c-2.ap-southeast-1.aws.neon.tech
-# Database
-# neondb
-# Role
-# neondb_owner
-# Password
-# ************
-# Pooler host
-# ep-sparkling-pond-aout11g1-pooler.c-2.ap-southeast-1.aws.neon.tech
+        orders_map = {}
 
+        for order, item in rows:
 
+            if order.id not in orders_map:
+                orders_map[order.id] = {
+                    "order": order,
+                    "items": [],
+                }
 
+            orders_map[order.id]["items"].append(OrderItemResponse.model_validate(item))
 
+        response = []
 
+        for data in orders_map.values():
 
+            response.append(
+                OrderDetailResponse(
+                    **data["order"].model_dump(),
+                    items=data["items"],
+                )
+            )
 
+        return response
 
+    async def get_order_byId(
+        self, userOrderid: str, session: AsyncSession, currentuser: User
+    ):
+        order_stmt = select(Order).where(
+            Order.id == userOrderid,
+            Order.user_id == currentuser.uid,
+        )
+        order = (await session.exec(order_stmt)).first()
+        if order is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Order not found",
+            )
+        items_stmt = select(OrderItem).where(OrderItem.order_id == order.id)
+        items = (await session.exec(items_stmt)).all()
+        return OrderDetailResponse(
+            **order.model_dump(),
+            items=[OrderItemResponse.model_validate(item) for item in items],
+        )
 
+    async def get_recent_orders(
+        self,
+        currentuser: User,
+        session: AsyncSession,
+    ):
+        stmt = (
+            select(Order)
+            .where(Order.user_id == currentuser.uid)
+            .order_by(desc(Order.updated_at))
+            .limit(5)
+        )
 
-
-# postgresql://neondb_owner:npg_7nRdKqsMp9NW@ep-sparkling-pond-aout11g1.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+        result = await session.exec(stmt)
+        return result.all()
