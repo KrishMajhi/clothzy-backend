@@ -72,9 +72,9 @@ async def user_login(
 
         device_name = parse_device(device["user_agent"])
 
-        logger.info(
-            f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}"
-        )
+        # logger.info(
+        #     f"LOGIN | User={user.email} | IP={device['ip']} | Device={device_name}"
+        # )
         print(
             "########################################################################>>>>>>>>>>>>>>>>>>.."
         )
@@ -145,7 +145,9 @@ async def delte_account(
     current_user: User = Depends(get_current_user),
     session=Depends(get_session),
 ):
-    dleted = await userService.delete_account(session, current_user.uid, password)
+    dleted = await userService.delete_account(
+        session=session, user_uid=current_user.uid, password=password
+    )
     if dleted is None:
         raise UserNotFoundException(detail="User not found or password is incorrect")
     return {"detail": "account deleted successfully"}

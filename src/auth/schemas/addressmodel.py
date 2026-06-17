@@ -22,7 +22,9 @@ class AddressModel(BaseModel):
         return value
     
 class AddressUpdateModel(BaseModel):
+    address_line_1: str | None = None
+    address_line_2: str | None = None
     city: str | None = None
     state: str | None = None
     country: str | None = None
-    pincode: str | None = None
+    postal_code: str | None = None

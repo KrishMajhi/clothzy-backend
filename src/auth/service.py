@@ -102,7 +102,10 @@ class UserService:
             user_uid,
         )
 
-        if user_to_delete is not None and user_to_delete.hashed_password == password:
+        if user_to_delete is not None and verify_password(
+            user_to_delete.hashed_password,
+            password,
+        ):
 
             await session.delete(user_to_delete)
             await session.commit()
