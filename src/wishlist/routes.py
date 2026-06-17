@@ -5,7 +5,7 @@ from src.auth.dependencies import get_current_user
 from src.auth.model import User
 
 from .service import WishlistService
-from .schemas.wishlistschema import WishlistCreateModel
+from .schemas.wishlistschema import WishlistCreateModel, WishlistItemResponse
 
 wishlist_router = APIRouter()
 
@@ -25,7 +25,7 @@ async def add_to_wishlist(
     )
 
 
-@wishlist_router.get("/")
+@wishlist_router.get("/", response_model=list[WishlistItemResponse])
 async def get_user_wishlist(
     session=Depends(get_session),
     current_user: User = Depends(get_current_user),
