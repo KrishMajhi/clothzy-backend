@@ -86,6 +86,7 @@ class WishlistService:
                     "review_count": product.review_count,
                     "image_url": (product.images[0] if product.images else None),
                     "colors": [color for color in product.colors],
+                    "sizes": [size for size in product.sizes],
                     "discount_percentage": discount_percentage,
                 }
             )

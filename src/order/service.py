@@ -8,6 +8,7 @@ from .schema import (
     OrderDetailResponse,
     OrderItemResponse,
     OrderResponse,
+    OrderSummaryResponse,
 )
 from src.auth.model import User
 from src.cart.model import Cart
@@ -16,6 +17,17 @@ from src.product.model import Product
 from src.product.service import ProductService
 from fastapi import HTTPException
 from .models import Order, OrderItem, ShippingMethod
+
+# pdf related:-
+from io import BytesIO
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
 
 cart_service = Cart_service()
 
@@ -81,6 +93,7 @@ class OrderService:
         current_user: User,
         session: AsyncSession,
     ):
+        # >here gettng prodicts and buying bith from cart,buy now from product page is yet remainingT
 
         cartdata = await cart_service.get_allItems_in_cart(session, current_user)
 
@@ -238,11 +251,76 @@ class OrderService:
         session: AsyncSession,
     ):
         stmt = (
-            select(Order)
+            select(
+                Order,
+                func.sum(OrderItem.quantity).label("item_count"),
+            )
+            .join(
+                OrderItem,
+                Order.id == OrderItem.order_id,
+            )
             .where(Order.user_id == currentuser.uid)
-            .order_by(desc(Order.updated_at))
+            .group_by(Order.id)
+            .order_by(desc(Order.created_at))
             .limit(5)
         )
+        query = await session.exec(stmt)
+        rows = query.all()
 
-        result = await session.exec(stmt)
-        return result.all()
+        response = []
+
+        for order, item_count in rows:
+
+            first_item_stmt = (
+                select(OrderItem).where(OrderItem.order_id == order.id).limit(1)
+            )
+
+            first_item = (await session.exec(first_item_stmt)).first()
+
+            thumbnail = None
+
+            if first_item:
+                product_stmt = select(Product).where(
+                    Product.id == first_item.product_id
+                )
+
+                product = (await session.exec(product_stmt)).first()
+
+                if product:
+                    thumbnail = product.images[0]
+
+            response.append(
+                OrderSummaryResponse(
+                    id=order.id,
+                    order_number=f"ORD-{str(order.id)[:8]}",
+                    created_at=order.created_at,
+                    item_count=item_count or 0,
+                    payment_method=order.payment_method,
+                    status=order.status,
+                    total_amount=order.total_amount,
+                    thumbnail=thumbnail,
+                )
+            )
+            return response
+
+    async def get_order_invoice_data(
+        self,
+        order_id,
+        current_user,
+        session,
+    ):
+        order_stmt = select(Order).where(
+            Order.id == order_id,
+            Order.user_id == current_user.uid,
+        )
+
+        order = (await session.exec(order_stmt)).first()
+
+        if not order:
+            return None
+
+        items_stmt = select(OrderItem).where(OrderItem.order_id == order.id)
+
+        order_items = (await session.exec(items_stmt)).all()
+
+        return order, order_items

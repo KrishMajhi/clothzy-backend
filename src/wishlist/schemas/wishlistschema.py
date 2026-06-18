@@ -14,11 +14,6 @@ class WishlistResponseModel(BaseModel):
     created_at: datetime
 
 
-
-
-
-
-
 class WishlistItemResponse(BaseModel):
     wishlist_id: UUID
     product_id: UUID
@@ -35,5 +30,5 @@ class WishlistItemResponse(BaseModel):
     image_url: str | None
 
     colors: list[str] = []
-
+    sizes: list[str] = []
     discount_percentage: int | None = None

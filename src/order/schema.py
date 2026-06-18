@@ -15,15 +15,19 @@ from .models import (
 class OrderSummaryResponse(BaseModel):
     id: UUID
 
-    total_amount: Decimal
-
-    status: OrderStatus
+    order_number: str
 
     created_at: datetime
 
     item_count: int
-    model_config = {"from_attributes": True}
 
+    payment_method: PaymentMethod
+
+    status: OrderStatus
+
+    total_amount: Decimal
+
+    thumbnail: str | None = None
 
 class OrderItemResponse(BaseModel):
     product_id: UUID

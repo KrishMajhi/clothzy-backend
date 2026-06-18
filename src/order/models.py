@@ -68,7 +68,7 @@ class Order(SQLModel, table=True):
     delivery_name: str
     delivery_phone: str
 
-    address_line_2: str | None = None
+    address_line_1: str | None = None
     address_line_2: str | None
 
     city: str
